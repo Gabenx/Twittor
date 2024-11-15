@@ -1,6 +1,12 @@
-const STATIC_CACHE_NAME = 'static-v1';
+//Imports
+importScripts('js/sw-utils.js');
+
+
+const STATIC_CACHE_NAME = 'static-v2';
 const INMUTABLE_CACHE_NAME = 'inmutable-v1';
 const DYNAMIC_CACHE_NAME = 'dynamic-v1';
+
+
 
 const APP_SHELL =[
     '/',
@@ -12,7 +18,8 @@ const APP_SHELL =[
     'img/avatars/ironman.jpg',
     'img/avatars/thor.jpg',
     'img/avatars/wolverine.jpg',
-    'js/app.js'
+    'js/app.js',
+    'js/sw-utils.js'
 ];
 
 
@@ -51,4 +58,22 @@ self.addEventListener('activate', e => {
 
     e.waitUntil(resp);
     
+});
+
+self.addEventListener('fetch', e=>{
+
+    const respuesta = caches.match(e.request).then(res => {
+
+        if (res){
+            return res;
+        } else{
+            return fetch(e.request).then( newRes =>{
+                return actualizaCacheDinamico(DYNAMIC_CACHE_NAME, e.request, newRes);
+            });
+        }
+        
+    });
+
+    e.respondWith(respuesta);
+
 });
